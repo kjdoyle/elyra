@@ -30,8 +30,8 @@ import {
   showDialog,
   Dialog
 } from '@jupyterlab/apputils';
-import { HTMLSelect } from '@jupyterlab/ui-components';
-import { Kernel } from '@jupyterlab/services';
+import { DockPanelSvg, HTMLSelect, TabBarSvg } from '@jupyterlab/ui-components';
+import { KernelSpec } from '@jupyterlab/services';
 import {
   OutputArea,
   OutputAreaModel,
@@ -41,13 +41,7 @@ import {
   RenderMimeRegistry,
   standardRendererFactories as initialFactories
 } from '@jupyterlab/rendermime';
-import {
-  BoxLayout,
-  PanelLayout,
-  Widget,
-  DockPanel,
-  TabBar
-} from '@phosphor/widgets';
+import { BoxLayout, PanelLayout, Widget } from '@lumino/widgets';
 
 import { PythonRunner } from './PythonRunner';
 
@@ -74,8 +68,8 @@ export class PythonFileEditor extends DocumentWidget<
   DocumentRegistry.ICodeModel
 > {
   private runner: PythonRunner;
-  private kernelSettings: Kernel.IOptions;
-  private dockPanel: DockPanel;
+  private kernelName: string;
+  private dockPanel: DockPanelSvg;
   private outputAreaWidget: OutputArea;
   private model: any;
   private emptyOutput: boolean;
@@ -90,7 +84,9 @@ export class PythonFileEditor extends DocumentWidget<
     this.addClass(PYTHON_FILE_EDITOR_CLASS);
     this.model = this.content.model;
     this.runner = new PythonRunner(this.model);
-    this.kernelSettings = { name: null };
+    // eslint-disable-next-line
+    // @ts-ignore
+    this.kernelName = null;
     this.emptyOutput = true;
 
     // Add python icon to main tab
@@ -98,7 +94,7 @@ export class PythonFileEditor extends DocumentWidget<
 
     // Add toolbar widgets
     const saveButton = new ToolbarButton({
-      iconClassName: SAVE_ICON_CLASS,
+      iconClass: SAVE_ICON_CLASS,
       onClick: this.saveFile,
       tooltip: 'Save file contents'
     });
@@ -109,13 +105,13 @@ export class PythonFileEditor extends DocumentWidget<
     );
 
     const runButton = new ToolbarButton({
-      iconClassName: RUN_ICON_CLASS,
+      iconClass: RUN_ICON_CLASS,
       onClick: this.runPython,
       tooltip: 'Run'
     });
 
     const stopButton = new ToolbarButton({
-      iconClassName: STOP_ICON_CLASS,
+      iconClass: STOP_ICON_CLASS,
       onClick: this.runner.shutDownKernel,
       tooltip: 'Stop'
     });
@@ -136,7 +132,7 @@ export class PythonFileEditor extends DocumentWidget<
    */
   private createOutputAreaWidget = (): void => {
     // Add dockpanel wrapper for output area
-    this.dockPanel = new DockPanel();
+    this.dockPanel = new DockPanelSvg();
     Widget.attach(this.dockPanel, document.body);
     window.addEventListener('resize', () => {
       this.dockPanel.fit();
@@ -150,8 +146,10 @@ export class PythonFileEditor extends DocumentWidget<
       model
     });
     this.outputAreaWidget.addClass(OUTPUT_AREA_CLASS);
+    this.outputAreaWidget.title.label = 'Python Console Output';
+    this.outputAreaWidget.title.closable = true;
 
-    const layout = this.layout as BoxLayout;
+    const layout = (this.layout as unknown) as BoxLayout;
     // TODO: Investigate SplitLayout instead of BoxLayout, for layout resizing functionality
     // const layout = this.layout as SplitLayout;
     layout.addWidget(this.dockPanel);
@@ -161,7 +159,7 @@ export class PythonFileEditor extends DocumentWidget<
    * Function: Updates kernel settings as per drop down selection.
    */
   private updateSelectedKernel = (selection: string): void => {
-    this.kernelSettings.name = selection;
+    this.kernelName = selection;
   };
 
   /**
@@ -170,7 +168,7 @@ export class PythonFileEditor extends DocumentWidget<
   private runPython = async (): Promise<void> => {
     this.resetOutputArea();
     this.displayOutputArea();
-    this.runner.runPython(this.kernelSettings, this.handleKernelMsg);
+    this.runner.runPython(this.kernelName, this.handleKernelMsg);
   };
 
   /**
@@ -214,7 +212,7 @@ export class PythonFileEditor extends DocumentWidget<
       // Add a tab to dockPanel
       this.dockPanel.addWidget(this.outputAreaWidget, { mode: 'split-bottom' });
 
-      const outputTab: TabBar<Widget> = this.dockPanel.tabBars().next();
+      const outputTab: TabBarSvg<Widget> = this.dockPanel.tabBars().next();
       outputTab.id = 'tab-python-editor-output';
       outputTab.currentTitle.label = 'Python Console Output';
       outputTab.currentTitle.closable = true;
@@ -346,7 +344,7 @@ class DropDownProps {
  * Class: Holds kernel state property.
  */
 class DropDownState {
-  kernelSpecs: Kernel.ISpecModels;
+  kernelSpecs: KernelSpec.ISpecModels;
 }
 
 /**
@@ -371,7 +369,7 @@ class DropDown extends React.Component<DropDownProps, DropDownState> {
    * Function: Gets kernel specs and state.
    */
   private async getKernelSPecs(): Promise<void> {
-    const specs: Kernel.ISpecModels = await this.props.runner.getKernelSpecs();
+    const specs: KernelSpec.ISpecModels = await this.props.runner.getKernelSpecs();
     this.filterPythonKernels(specs);
 
     // Set kernel to default
@@ -384,7 +382,7 @@ class DropDown extends React.Component<DropDownProps, DropDownState> {
   /**
    * Function: Filters for python kernel specs only.
    */
-  private filterPythonKernels = (specs: Kernel.ISpecModels): void => {
+  private filterPythonKernels = (specs: KernelSpec.ISpecModels): void => {
     Object.entries(specs.kernelspecs)
       .filter(entry => entry[1].language !== 'python')
       .forEach(entry => delete specs.kernelspecs[entry[0]]);
@@ -393,7 +391,7 @@ class DropDown extends React.Component<DropDownProps, DropDownState> {
   /**
    * Function: Creates drop down options with available python kernel specs.
    */
-  private createOptionElems = (specs: Kernel.ISpecModels): void => {
+  private createOptionElems = (specs: KernelSpec.ISpecModels): void => {
     const kernelNames: string[] = Object.keys(specs.kernelspecs);
     kernelNames.forEach((specName: string, i: number) => {
       const elem = React.createElement(
@@ -420,11 +418,6 @@ class DropDown extends React.Component<DropDownProps, DropDownState> {
           {
             className: DROPDOWN_CLASS,
             onChange: this.handleSelection.bind(this),
-            iconProps: {
-              icon: (
-                <span className="jp-MaterialIcon jp-DownCaretIcon bp3-icon" />
-              )
-            },
             defaultValue: this.state.kernelSpecs.default
           },
           this.kernelOptionElems

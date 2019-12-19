@@ -17,9 +17,9 @@ import { Dialog, showDialog, ToolbarButton } from '@jupyterlab/apputils';
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 import { INotebookModel, NotebookPanel } from '@jupyterlab/notebook';
 import { JupyterFrontEnd } from '@jupyterlab/application';
-import { JSONObject, JSONValue } from '@phosphor/coreutils';
-import { Widget } from '@phosphor/widgets';
-import { IDisposable } from '@phosphor/disposable';
+import { JSONObject, JSONValue } from '@lumino/coreutils';
+import { Widget } from '@lumino/widgets';
+import { IDisposable } from '@lumino/disposable';
 
 import { NotebookParser, SubmissionHandler } from '@elyra/application';
 
@@ -69,6 +69,8 @@ export class SubmitNotebookButtonExtension
   readonly app: JupyterFrontEnd;
 
   showWidget = (): void => {
+    // eslint-disable-next-line
+    // @ts-ignore
     const envVars: string[] = NotebookParser.getEnvVars(
       this.panel.content.model.toString()
     );

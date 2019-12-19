@@ -35,11 +35,11 @@ import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
 import { ILauncher } from '@jupyterlab/launcher';
 import { IMainMenu } from '@jupyterlab/mainmenu';
 import { NotebookPanel } from '@jupyterlab/notebook';
-import { IconRegistry, IIconRegistry } from '@jupyterlab/ui-components';
+import { notebookIcon } from '@jupyterlab/ui-components';
 
-import { toArray } from '@phosphor/algorithm';
-import { IDragEvent } from '@phosphor/dragdrop';
-import { Widget, PanelLayout } from '@phosphor/widgets';
+import { toArray } from '@lumino/algorithm';
+import { IDragEvent } from '@lumino/dragdrop';
+import { Widget, PanelLayout } from '@lumino/widgets';
 
 import {
   CommonCanvas,
@@ -47,7 +47,11 @@ import {
   CommonProperties
 } from '@elyra/canvas';
 import '@elyra/canvas/dist/common-canvas.min.css';
-import { NotebookParser, SubmissionHandler } from '@elyra/application';
+import {
+  NotebookParser,
+  SubmissionHandler,
+  pipelineIcon
+} from '@elyra/application';
 import 'carbon-components/css/carbon-components.min.css';
 import '../style/index.css';
 
@@ -58,7 +62,7 @@ import * as React from 'react';
 
 import { IntlProvider } from 'react-intl';
 
-const PIPELINE_ICON_CLASS = 'jp-MaterialIcon elyra-PipelineIcon';
+const PIPELINE_ICON_CLASS = 'jp-PipelineIcon elyra-PipelineIcon';
 const PIPELINE_CLASS = 'elyra-PipelineEditor';
 const PIPELINE_FACTORY = 'Pipeline Editor';
 const PIPELINE = 'pipeline';
@@ -136,14 +140,12 @@ class Canvas extends ReactWidget {
   app: JupyterFrontEnd;
   browserFactory: IFileBrowserFactory;
   context: DocumentRegistry.Context;
-  iconRegistry: IconRegistry;
 
   constructor(props: any) {
     super(props);
     this.app = props.app;
     this.browserFactory = props.browserFactory;
     this.context = props.context;
-    this.iconRegistry = props.iconRegistry;
   }
 
   render(): React.ReactElement {
@@ -151,7 +153,6 @@ class Canvas extends ReactWidget {
       <Pipeline
         app={this.app}
         browserFactory={this.browserFactory}
-        iconRegistry={this.iconRegistry}
         widgetContext={this.context}
       />
     );
@@ -168,7 +169,6 @@ namespace Pipeline {
   export interface IProps {
     app: JupyterFrontEnd;
     browserFactory: IFileBrowserFactory;
-    iconRegistry: IIconRegistry;
     widgetContext: DocumentRegistry.Context;
   }
 
@@ -191,7 +191,6 @@ namespace Pipeline {
 class Pipeline extends React.Component<Pipeline.IProps, Pipeline.IState> {
   app: JupyterFrontEnd;
   browserFactory: IFileBrowserFactory;
-  iconRegistry: IconRegistry;
   canvasController: any;
   widgetContext: DocumentRegistry.Context;
   position = 10;
@@ -201,7 +200,6 @@ class Pipeline extends React.Component<Pipeline.IProps, Pipeline.IState> {
     super(props);
     this.app = props.app;
     this.browserFactory = props.browserFactory;
-    this.iconRegistry = props.iconRegistry;
     this.canvasController = new CanvasController();
     this.canvasController.setPipelineFlowPalette(palette);
     this.widgetContext = props.widgetContext;
@@ -432,7 +430,15 @@ class Pipeline extends React.Component<Pipeline.IProps, Pipeline.IState> {
           );
           data.nodeTemplate.image =
             'data:image/svg+xml;utf8,' +
-            encodeURIComponent(this.iconRegistry.svg('notebook'));
+            encodeURIComponent(notebookIcon.svgstr);
+          data.nodeTemplate.label = item.path.replace(/^.*[\\/]/, '');
+          data.nodeTemplate.label = data.nodeTemplate.label.replace(
+            /\.[^/.]+$/,
+            ''
+          );
+          data.nodeTemplate.image =
+            'data:image/svg+xml;utf8,' +
+            encodeURIComponent(notebookIcon.svgstr);
           data.nodeTemplate.app_data['artifact'] = item.path;
           data.nodeTemplate.app_data[
             'image'
@@ -558,14 +564,16 @@ class Pipeline extends React.Component<Pipeline.IProps, Pipeline.IState> {
     const node = this.node.current!;
     node.addEventListener('dragenter', this.handleEvent);
     node.addEventListener('dragover', this.handleEvent);
-    node.addEventListener('p-dragover', this.handleEvent);
-    node.addEventListener('p-drop', this.handleEvent);
+    node.addEventListener('lm-dragenter', this.handleEvent);
+    node.addEventListener('lm-dragover', this.handleEvent);
+    node.addEventListener('lm-drop', this.handleEvent);
   }
 
   componentWillUnmount(): void {
     const node = this.node.current!;
-    node.removeEventListener('p-drop', this.handleEvent);
-    node.removeEventListener('p-dragover', this.handleEvent);
+    node.removeEventListener('lm-drop', this.handleEvent);
+    node.removeEventListener('lm-dragover', this.handleEvent);
+    node.removeEventListener('lm-dragenter', this.handleEvent);
     node.removeEventListener('dragover', this.handleEvent);
     node.removeEventListener('dragenter', this.handleEvent);
   }
@@ -583,12 +591,15 @@ class Pipeline extends React.Component<Pipeline.IProps, Pipeline.IState> {
       case 'dragover':
         event.preventDefault();
         break;
-      case 'p-dragover':
+      case 'lm-dragenter':
+        event.preventDefault();
+        break;
+      case 'lm-dragover':
         event.preventDefault();
         event.stopPropagation();
         (event as IDragEvent).dropAction = (event as IDragEvent).proposedAction;
         break;
-      case 'p-drop':
+      case 'lm-drop':
         event.preventDefault();
         event.stopPropagation();
         this.handleAdd(
@@ -605,13 +616,11 @@ class Pipeline extends React.Component<Pipeline.IProps, Pipeline.IState> {
 class PipelineEditorFactory extends ABCWidgetFactory<DocumentWidget> {
   app: JupyterFrontEnd;
   browserFactory: IFileBrowserFactory;
-  iconRegistry: IconRegistry;
 
   constructor(options: any) {
     super(options);
     this.app = options.app;
     this.browserFactory = options.browserFactory;
-    this.iconRegistry = options.iconRegistry;
   }
 
   protected createNewWidget(context: DocumentRegistry.Context): DocumentWidget {
@@ -619,7 +628,6 @@ class PipelineEditorFactory extends ABCWidgetFactory<DocumentWidget> {
     const props = {
       app: this.app,
       browserFactory: this.browserFactory,
-      iconRegistry: this.iconRegistry,
       context: context
     };
     const content = new Canvas(props);
@@ -629,7 +637,6 @@ class PipelineEditorFactory extends ABCWidgetFactory<DocumentWidget> {
       node: document.createElement('div')
     });
     widget.addClass(PIPELINE_CLASS);
-    widget.title.iconClass = PIPELINE_ICON_CLASS;
     return widget;
   }
 }
@@ -645,8 +652,7 @@ const extension: JupyterFrontEndPlugin<void> = {
     ILauncher,
     IFileBrowserFactory,
     ILayoutRestorer,
-    IMainMenu,
-    IIconRegistry
+    IMainMenu
   ],
   activate: (
     app: JupyterFrontEnd,
@@ -654,8 +660,7 @@ const extension: JupyterFrontEndPlugin<void> = {
     launcher: ILauncher,
     browserFactory: IFileBrowserFactory,
     restorer: ILayoutRestorer,
-    menu: IMainMenu,
-    iconRegistry: IIconRegistry
+    menu: IMainMenu
   ) => {
     console.log('Elyra - pipeline-editor extension is activated!');
 
@@ -665,15 +670,14 @@ const extension: JupyterFrontEndPlugin<void> = {
       fileTypes: [PIPELINE],
       defaultFor: [PIPELINE],
       app: app,
-      browserFactory: browserFactory,
-      iconRegistry: iconRegistry
+      browserFactory: browserFactory
     });
 
     // Add the default behavior of opening the widget for .pipeline files
     app.docRegistry.addFileType({
       name: PIPELINE,
       extensions: ['.pipeline'],
-      iconClass: PIPELINE_ICON_CLASS
+      icon: pipelineIcon
     });
     app.docRegistry.addWidgetFactory(pipelineEditorFactory);
 
