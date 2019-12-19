@@ -23,9 +23,9 @@ import {IMainMenu} from '@jupyterlab/mainmenu';
 import {NotebookPanel} from "@jupyterlab/notebook";
 import {IconRegistry, IIconRegistry} from '@jupyterlab/ui-components';
 
-import {toArray} from '@phosphor/algorithm';
-import {IDragEvent} from '@phosphor/dragdrop';
-import {Widget, PanelLayout} from '@phosphor/widgets';
+import {toArray} from '@lumino/algorithm';
+import {IDragEvent} from '@lumino/dragdrop';
+import {Widget, PanelLayout} from '@lumino/widgets';
 
 import {CommonCanvas, CanvasController, CommonProperties} from '@elyra-ai/canvas';
 import '@elyra-ai/canvas/dist/common-canvas.min.css';
