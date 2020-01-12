@@ -24,7 +24,7 @@ import {ILauncher} from '@jupyterlab/launcher';
 import {IMainMenu} from '@jupyterlab/mainmenu';
 import {WidgetTracker, ICommandPalette} from '@jupyterlab/apputils';
 
-import {JSONObject} from '@phosphor/coreutils';
+import {JSONObject} from '@lumino/coreutils';
 
 import {PythonFileEditorFactory, PythonFileEditor} from "./widget";
 

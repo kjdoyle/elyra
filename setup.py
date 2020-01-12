@@ -41,10 +41,11 @@ setup_args = dict(
     packages=find_packages(),
     install_requires=[
         "jupyter_core>=4.0,<5.0",
+        "ipywidgets",
         "kfp==0.2.0",
         "kfp-notebook>=0.4.0",
         "minio>=5.0.7",
-        'jupyterlab>=1.0.0,<2.0.0',
+        'jupyterlab>=2.0.0',
         'jupyterlab-git',
         'nbconvert>=5.6.1',
         'notebook>=6',
