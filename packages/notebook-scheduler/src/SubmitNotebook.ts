@@ -68,7 +68,10 @@ export class SubmitNotebookButtonExtension implements DocumentRegistry.IWidgetEx
   readonly app: JupyterFrontEnd;
 
   showWidget = () => {
-    let envVars: string[] = NotebookParser.getEnvVars(this.panel.content.model.toString());
+
+    // @ts-ignore
+    let envVars = NotebookParser.getEnvVars(this.panel.content.model.toString());
+
 
     SubmissionHandler.makeGetRequest('api/metadata/runtimes', 'pipeline', (response: any) =>
       showDialog({
