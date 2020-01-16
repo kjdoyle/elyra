@@ -22,7 +22,7 @@ import {ABCWidgetFactory, DocumentRegistry, DocumentWidget} from '@jupyterlab/do
 import {CodeEditor, IEditorServices} from '@jupyterlab/codeeditor';
 import {ToolbarButton, ReactWidget, showDialog, Dialog} from '@jupyterlab/apputils';
 import {HTMLSelect} from '@jupyterlab/ui-components';
-import {Kernel} from '@jupyterlab/services';
+import {KernelSpec} from '@jupyterlab/services';
 import {OutputArea, OutputAreaModel, OutputPrompt} from '@jupyterlab/outputarea';
 import {RenderMimeRegistry,standardRendererFactories as initialFactories} from '@jupyterlab/rendermime';
 import {BoxLayout, PanelLayout, Widget, DockPanel, TabBar} from '@lumino/widgets';
@@ -48,7 +48,7 @@ const SAVE_ICON_CLASS = 'jp-SaveIcon';
  */
 export class PythonFileEditor extends DocumentWidget<FileEditor, DocumentRegistry.ICodeModel> {
   private runner: PythonRunner;
-  private kernelSettings: Kernel.IOptions;
+  private kernelName: string;
   private dockPanel: DockPanel;
   private outputAreaWidget: OutputArea;
   private model: any;
@@ -61,7 +61,8 @@ export class PythonFileEditor extends DocumentWidget<FileEditor, DocumentRegistr
     this.addClass(PYTHON_FILE_EDITOR_CLASS);
     this.model = this.content.model;
     this.runner = new PythonRunner(this.model);
-    this.kernelSettings = {name: null};
+    // @ts-ignore
+    this.kernelName = null;
 
     // Add python icon to main tab
     this.title.iconClass = PYTHON_ICON_CLASS;
@@ -115,7 +116,7 @@ export class PythonFileEditor extends DocumentWidget<FileEditor, DocumentRegistr
     this.outputAreaWidget = new OutputArea({ rendermime: renderMimeRegistry, model });
     this.outputAreaWidget.addClass(OUTPUT_AREA_CLASS);
 
-    const layout = this.layout as BoxLayout;
+    const layout = this.layout as unknown as BoxLayout;
     // TODO: Investigate SplitLayout instead of BoxLayout, for layout resizing functionality
     // const layout = this.layout as SplitLayout;
     layout.addWidget(this.dockPanel);
@@ -125,7 +126,7 @@ export class PythonFileEditor extends DocumentWidget<FileEditor, DocumentRegistr
    * Function: Updates kernel settings as per drop down selection.
    */
   private updateSelectedKernel = (selection: string) => {
-    this.kernelSettings.name = selection;
+    this.kernelName = selection;
   };
 
   /**
@@ -134,7 +135,7 @@ export class PythonFileEditor extends DocumentWidget<FileEditor, DocumentRegistr
   private runPython = async () => {
     this.resetOutputArea();
     this.displayOutputArea();
-    this.runner.runPython(this.kernelSettings, this.handleKernelMsg);
+    this.runner.runPython(this.kernelName, this.handleKernelMsg);
   };
 
   /**
@@ -274,7 +275,7 @@ class DropDownProps {
  * Class: Holds kernel state property.
  */
 class DropDownState {
-  kernelSpecs: Kernel.ISpecModels;
+  kernelSpecs: KernelSpec.ISpecModels;
 };
 
 /**
@@ -299,7 +300,7 @@ class DropDown extends React.Component<DropDownProps, DropDownState> {
    * Function: Gets kernel specs and state.
    */
   private async getKernelSPecs() {
-    const specs: Kernel.ISpecModels = await this.props.runner.getKernelSpecs();
+    let specs = await this.props.runner.getKernelSpecs();
     this.filterPythonKernels(specs);
 
     // Set kernel to default
@@ -312,7 +313,7 @@ class DropDown extends React.Component<DropDownProps, DropDownState> {
   /**
    * Function: Filters for python kernel specs only.
    */
-  private filterPythonKernels = (specs: Kernel.ISpecModels) => {
+  private filterPythonKernels = (specs: KernelSpec.ISpecModels) => {
     Object.entries(specs.kernelspecs)
       .filter(entry => entry[1].language !== 'python')
       .forEach(entry => delete specs.kernelspecs[entry[0]]);
@@ -321,7 +322,7 @@ class DropDown extends React.Component<DropDownProps, DropDownState> {
   /**
    * Function: Creates drop down options with available python kernel specs.
    */
-  private createOptionElems  = (specs: Kernel.ISpecModels) => {
+  private createOptionElems  = (specs: KernelSpec.ISpecModels) => {
     const kernelNames : string[] = Object.keys(specs.kernelspecs);
     kernelNames.forEach((specName: string, i: number) => {
       const elem = React.createElement('option', {key: i, value: specName}, specName);
