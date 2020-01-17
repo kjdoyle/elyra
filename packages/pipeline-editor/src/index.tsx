@@ -21,7 +21,6 @@ import {IFileBrowserFactory} from '@jupyterlab/filebrowser';
 import {ILauncher} from '@jupyterlab/launcher';
 import {IMainMenu} from '@jupyterlab/mainmenu';
 import {NotebookPanel} from "@jupyterlab/notebook";
-import {IconRegistry, IIconRegistry} from '@jupyterlab/ui-components';
 
 import {toArray} from '@lumino/algorithm';
 import {IDragEvent} from '@lumino/dragdrop';
@@ -109,21 +108,18 @@ class Canvas extends ReactWidget {
   app: JupyterFrontEnd;
   browserFactory: IFileBrowserFactory;
   context: DocumentRegistry.Context;
-  iconRegistry: IconRegistry;
 
   constructor(props: any) {
     super(props);
     this.app = props.app;
     this.browserFactory = props.browserFactory;
     this.context = props.context;
-    this.iconRegistry = props.iconRegistry;
   }
 
   render() {
     return <Pipeline
       app={this.app}
       browserFactory={this.browserFactory}
-      iconRegistry={this.iconRegistry}
       widgetContext={this.context}
     />
   }
@@ -139,7 +135,6 @@ namespace Pipeline {
   export interface Props {
     app: JupyterFrontEnd;
     browserFactory: IFileBrowserFactory;
-    iconRegistry: IIconRegistry;
     widgetContext: DocumentRegistry.Context;
   }
 
@@ -162,7 +157,6 @@ namespace Pipeline {
 class Pipeline extends React.Component<Pipeline.Props, Pipeline.State> {
   app: JupyterFrontEnd;
   browserFactory: IFileBrowserFactory;
-  iconRegistry: IconRegistry;
   canvasController: any;
   widgetContext: DocumentRegistry.Context;
   position: number = 10;
@@ -172,7 +166,6 @@ class Pipeline extends React.Component<Pipeline.Props, Pipeline.State> {
     super(props);
     this.app = props.app;
     this.browserFactory = props.browserFactory;
-    this.iconRegistry = props.iconRegistry;
     this.canvasController = new CanvasController();
     this.canvasController.setPipelineFlowPalette(palette);
     this.widgetContext = props.widgetContext;
@@ -363,7 +356,6 @@ class Pipeline extends React.Component<Pipeline.Props, Pipeline.State> {
 
             data.nodeTemplate.label = item.path.replace(/^.*[\\\/]/, '');
             data.nodeTemplate.label = data.nodeTemplate.label.replace(/\.[^/.]+$/, '');
-            data.nodeTemplate.image = 'data:image/svg+xml;utf8,' + encodeURIComponent(this.iconRegistry.svg('notebook'));
             data.nodeTemplate.app_data['artifact'] = item.path;
             data.nodeTemplate.app_data['image'] = this.propertiesInfo.parameterDef.current_parameters.image;
             data.nodeTemplate.app_data['vars'] = vars;
@@ -521,13 +513,11 @@ class Pipeline extends React.Component<Pipeline.Props, Pipeline.State> {
 class PipelineEditorFactory extends ABCWidgetFactory<DocumentWidget> {
   app: JupyterFrontEnd;
   browserFactory: IFileBrowserFactory;
-  iconRegistry: IconRegistry;
 
   constructor(options: any) {
     super(options);
     this.app = options.app;
     this.browserFactory = options.browserFactory;
-    this.iconRegistry = options.iconRegistry;
   }
 
   protected createNewWidget(
@@ -537,13 +527,11 @@ class PipelineEditorFactory extends ABCWidgetFactory<DocumentWidget> {
     let props = {
       app: this.app,
       browserFactory: this.browserFactory,
-      iconRegistry: this.iconRegistry,
       context: context
     };
     const content = new Canvas(props);
     const widget = new DocumentWidget({ content, context, node: document.createElement('div') });
     widget.addClass(PIPELINE_CLASS);
-    widget.title.iconClass = PIPELINE_ICON_CLASS;
     return widget;
   }
 }
@@ -554,15 +542,14 @@ class PipelineEditorFactory extends ABCWidgetFactory<DocumentWidget> {
 const extension: JupyterFrontEndPlugin<void> = {
   id: PIPELINE,
   autoStart: true,
-  requires: [ICommandPalette, ILauncher, IFileBrowserFactory, ILayoutRestorer, IMainMenu, IIconRegistry],
+  requires: [ICommandPalette, ILauncher, IFileBrowserFactory, ILayoutRestorer, IMainMenu],
   activate: (
     app: JupyterFrontEnd,
     palette: ICommandPalette,
     launcher: ILauncher,
     browserFactory: IFileBrowserFactory,
     restorer: ILayoutRestorer,
-    menu: IMainMenu,
-    iconRegistry: IIconRegistry
+    menu: IMainMenu
   ) => {
     console.log('Elyra - pipeline-editor extension is activated!');
 
@@ -572,8 +559,7 @@ const extension: JupyterFrontEndPlugin<void> = {
       fileTypes: [PIPELINE],
       defaultFor: [PIPELINE],
       app: app,
-      browserFactory: browserFactory,
-      iconRegistry: iconRegistry
+      browserFactory: browserFactory
     });
 
     // Add the default behavior of opening the widget for .pipeline files
