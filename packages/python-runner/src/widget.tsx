@@ -177,7 +177,7 @@ export class PythonFileEditor extends DocumentWidget<FileEditor, DocumentRegistr
 
     if ( this.dockPanel.isEmpty ){
       // Add a tab to dockPanel
-      this.dockPanel.addWidget(this.outputAreaWidget, { mode: 'split-bottom' });
+      this.dockPanel.addWidget(this.outputAreaWidget as unknown as Widget, { mode: 'split-bottom' });
 
       let outputTab: TabBar<Widget> = this.dockPanel.tabBars().next();
       outputTab.id = 'tab-python-editor-output';
@@ -222,7 +222,7 @@ export class PythonFileEditor extends DocumentWidget<FileEditor, DocumentRegistr
    * Function: Gets OutputArea child widget, where output and kernel status are displayed.
    */
   private getOutputAreaChildWidget = () => {
-    const outputAreaChildLayout = this.outputAreaWidget.layout as PanelLayout;
+    const outputAreaChildLayout = this.outputAreaWidget.layout as unknown as PanelLayout;
     return outputAreaChildLayout.widgets[0];
   };
 
@@ -231,7 +231,7 @@ export class PythonFileEditor extends DocumentWidget<FileEditor, DocumentRegistr
    */
   private getOutputAreaPromptWidget = () => {
     const outputAreaChildLayout = this.getOutputAreaChildWidget().layout as PanelLayout;
-    return outputAreaChildLayout.widgets[0] as OutputPrompt;
+    return outputAreaChildLayout.widgets[0] as unknown as OutputPrompt;
   };
 
   /**

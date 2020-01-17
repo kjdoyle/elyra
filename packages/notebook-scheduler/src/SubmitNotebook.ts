@@ -18,7 +18,7 @@ import {DocumentRegistry} from "@jupyterlab/docregistry";
 import {INotebookModel, NotebookPanel} from "@jupyterlab/notebook";
 import {JupyterFrontEnd} from "@jupyterlab/application";
 import {JSONObject, JSONValue} from "@lumino/coreutils";
-import {Widget} from '@lumino/widgets';
+import {PanelLayout, Widget} from '@lumino/widgets';
 import {IDisposable} from "@lumino/disposable";
 
 import {NotebookParser, SubmissionHandler} from "@elyra/application";
@@ -76,7 +76,7 @@ export class SubmitNotebookButtonExtension implements DocumentRegistry.IWidgetEx
     SubmissionHandler.makeGetRequest('api/metadata/runtimes', 'pipeline', (response: any) =>
       showDialog({
         title: 'Submit notebook',
-        body: new SubmitNotebook(envVars, response.runtimes),
+        body: new SubmitNotebook(envVars, response.runtimes)  as unknown as Dialog.IBodyWidget<ISubmitNotebookConfiguration>,
         buttons: [Dialog.cancelButton(), Dialog.okButton()]
       }).then(result => {
         if (result.value == null) {
@@ -117,7 +117,7 @@ export class SubmitNotebookButtonExtension implements DocumentRegistry.IWidgetEx
  * - Request information about the remote location to where submit the
  * notebook for execution
  */
-export class SubmitNotebook extends Widget implements Dialog.IBodyWidget<ISubmitNotebookConfiguration>  {
+export class SubmitNotebook extends Widget {
   _envVars: string[];
   _runtimes: any;
 
