@@ -76,7 +76,7 @@ export class SubmitNotebookButtonExtension implements DocumentRegistry.IWidgetEx
     SubmissionHandler.makeGetRequest('api/metadata/runtimes', 'pipeline', (response: any) =>
       showDialog({
         title: 'Submit notebook',
-        body: new SubmitNotebook(envVars, response.runtimes)  as unknown as Dialog.IBodyWidget<ISubmitNotebookConfiguration>,
+        body: new SubmitNotebook(envVars, response.runtimes),
         buttons: [Dialog.cancelButton(), Dialog.okButton()]
       }).then(result => {
         if (result.value == null) {
@@ -117,7 +117,7 @@ export class SubmitNotebookButtonExtension implements DocumentRegistry.IWidgetEx
  * - Request information about the remote location to where submit the
  * notebook for execution
  */
-export class SubmitNotebook extends Widget {
+export class SubmitNotebook extends Widget implements Dialog.IBodyWidget<ISubmitNotebookConfiguration>  {
   _envVars: string[];
   _runtimes: any;
 
