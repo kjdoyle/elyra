@@ -14,11 +14,6 @@
  * limitations under the License.
  */
 
-/* Add CSS variables to :root */
-:root {
-  --elyra-icon-pipeline: url('./pipeline-flow.svg');
-}
-
 .add .list-item {
 	background-image: url('./add-notebook-node.svg');
 	background-repeat: no-repeat;

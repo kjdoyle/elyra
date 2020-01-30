@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2020 IBM Corporation
+ * Copyright 2018-2019 IBM Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,5 +14,7 @@
  * limitations under the License.
  */
 
-export * from './parsing';
-export * from './submission';
+declare module '*.svg' {
+  const image: string;
+  export default image;
+}
