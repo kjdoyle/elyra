@@ -18,7 +18,7 @@ import {DocumentRegistry} from "@jupyterlab/docregistry";
 import {INotebookModel, NotebookPanel} from "@jupyterlab/notebook";
 import {JupyterFrontEnd} from "@jupyterlab/application";
 import {JSONObject, JSONValue} from "@lumino/coreutils";
-import {PanelLayout, Widget} from '@lumino/widgets';
+import {Widget} from '@lumino/widgets';
 import {IDisposable} from "@lumino/disposable";
 
 import {NotebookParser, SubmissionHandler} from "@elyra/application";
