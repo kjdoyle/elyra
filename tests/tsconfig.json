@@ -1,5 +1,5 @@
 {
-  "extends": "../../tsconfigbase",
+  "extends": "../tsconfig-base",
   "compilerOptions": {
     "outDir": "build",
     "types": ["jest"],
@@ -8,9 +8,6 @@
   },
   "include": ["src/*"],
   "references": [
-    {
-      "path": "../../testutils"
-    },
     {
       "path": "../packages/pipeline-editor"
     }
