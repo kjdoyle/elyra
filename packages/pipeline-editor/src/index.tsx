@@ -530,7 +530,7 @@ export class PipelineEditorFactory extends ABCWidgetFactory<DocumentWidget> {
     this.iconRegistry = options.iconRegistry;
   }
 
-  protected createNewWidget(
+  createNewWidget(
     context: DocumentRegistry.Context
   ): DocumentWidget {
     // Creates a blank widget with a DocumentWidget wrapper
