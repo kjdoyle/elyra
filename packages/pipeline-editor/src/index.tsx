@@ -518,7 +518,7 @@ class Pipeline extends React.Component<Pipeline.Props, Pipeline.State> {
   }
 }
 
-class PipelineEditorFactory extends ABCWidgetFactory<DocumentWidget> {
+export class PipelineEditorFactory extends ABCWidgetFactory<DocumentWidget> {
   app: JupyterFrontEnd;
   browserFactory: IFileBrowserFactory;
   iconRegistry: IconRegistry;
