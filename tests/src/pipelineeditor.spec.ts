@@ -1,24 +1,51 @@
 import { expect } from 'chai';
-import { PipelineEditorFactory } from '../../packages/pipeline-editor';
-import {ABCWidgetFactory, DocumentWidget} from '@jupyterlab/docregistry';
-import {createSessionContext} from "@jupyterlab/testutils";
+import { Canvas } from '../../packages/pipeline-editor';
+import { ServiceManager } from '@jupyterlab/services';
+import { Message } from '@lumino/messaging';
+import { createFileContext } from '@jupyterlab/testutils';
+import {
+  Context,
+  DocumentRegistry
+} from '@jupyterlab/docregistry';
+
+class LogPipeline extends Canvas {
+  methods: string[] = [];
+
+  protected onUpdateRequest(msg: Message): void {
+    super.onUpdateRequest(msg);
+    this.methods.push('onUpdateRequest');
+  }
+
+  protected onActivateRequest(msg: Message): void {
+    super.onActivateRequest(msg);
+    this.methods.push('onActivateRequest');
+  }
+}
 
 describe('PipelineEditor', () => {
-  let extension: DocumentWidget;
-  let extensionFactory: PipelineEditorFactory;
+  let context: Context<DocumentRegistry.IModel>;
+  let manager: ServiceManager.IManager;
+  let widget: LogPipeline;
+
+  beforeAll(async () => {
+    manager = new ServiceManager({ standby: 'never' });
+    await manager.ready;
+    return manager.contents.get("/Users/martha.cryanibm.com/gitrepos/elyra/test.pipeline");
+  });
 
   beforeEach(() => {
-    extensionFactory = new PipelineEditorFactory(createSessionContext({}));
-    extension = extensionFactory.createNewWidget();
+    context = createFileContext();
+    widget = new LogPipeline(context);
+    return context.initialize(false);
   });
 
   // afterEach(() => {
-  //   extension.dispose();
+  //   widget.dispose();
   // });
 
-  describe('#constructor', () => {
-    it('should create a new extension', () => {
-      expect(extension).to.be.an.instanceof(DocumentWidget);
+  describe('#constructor()', () => {
+    it('should create a pipeline editor', () => {
+      expect(widget).to.be.an.instanceof(Canvas);
     });
   });
 });

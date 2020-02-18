@@ -105,7 +105,7 @@ class PipelineDialog extends Widget implements Dialog.IBodyWidget<any> {
 /**
  * Class for Common Canvas React Component
  */
-class Canvas extends ReactWidget {
+export class Canvas extends ReactWidget {
   app: JupyterFrontEnd;
   browserFactory: IFileBrowserFactory;
   context: DocumentRegistry.Context;
@@ -551,11 +551,18 @@ export class PipelineEditorFactory extends ABCWidgetFactory<DocumentWidget> {
 /**
  * Initialization data for the pipeline-editor-extension extension.
  */
-const extension: JupyterFrontEndPlugin<void> = {
-  id: PIPELINE,
-  autoStart: true,
-  requires: [ICommandPalette, ILauncher, IFileBrowserFactory, ILayoutRestorer, IMainMenu, IIconRegistry],
-  activate: (
+export class PipelineEditorExtension implements JupyterFrontEndPlugin<void> {
+  id: string;
+  autoStart: boolean;
+  requires: any;
+
+  constructor(options: any) {
+    this.id = PIPELINE;
+    this.autoStart = true;
+    this.requires = [ICommandPalette, ILauncher, IFileBrowserFactory, ILayoutRestorer, IMainMenu, IIconRegistry];
+  };
+
+  activate (
     app: JupyterFrontEnd,
     palette: ICommandPalette,
     launcher: ILauncher,
@@ -563,7 +570,7 @@ const extension: JupyterFrontEndPlugin<void> = {
     restorer: ILayoutRestorer,
     menu: IMainMenu,
     iconRegistry: IIconRegistry
-  ) => {
+  ) {
     console.log('Elyra - pipeline-editor extension is activated!');
 
     // Set up new widget Factory for .pipeline files
@@ -639,5 +646,7 @@ const extension: JupyterFrontEndPlugin<void> = {
       30
     );
   }
- };
+}
+
+const extension = new PipelineEditorExtension({});
  export default extension;
