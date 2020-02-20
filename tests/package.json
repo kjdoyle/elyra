@@ -1,11 +1,10 @@
 {
   "name": "@jupyterlab/test-pipelineeditor",
-  "version": "1.0.0",
+  "version": "0.4.0",
   "private": true,
   "scripts": {
     "build": "tsc -b",
-    "clean": "rimraf build && rimraf coverage",
-    "coverage": "python run.py --coverage",
+    "clean": "rimraf lib && rimraf node_modules && rimraf yarn.lock && rimraf yarn-error.log && rimraf tsconfig.tsbuildinfo",
     "test": "python run.py",
     "watch": "python run.py --debug",
     "watch:all": "python run.py --debug --watchAll",
