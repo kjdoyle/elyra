@@ -39,10 +39,6 @@ describe('PipelineEditor', () => {
     return context.initialize(false);
   });
 
-  // afterEach(() => {
-  //   widget.dispose();
-  // });
-
   describe('#constructor()', () => {
     it('should create a pipeline editor', () => {
       expect(widget).to.be.an.instanceof(Canvas);
