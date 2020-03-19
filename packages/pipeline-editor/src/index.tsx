@@ -431,14 +431,6 @@ class Pipeline extends React.Component<Pipeline.IProps, Pipeline.IState> {
           data.nodeTemplate.image =
             'data:image/svg+xml;utf8,' +
             encodeURIComponent(notebookIcon.svgstr);
-          data.nodeTemplate.label = item.path.replace(/^.*[\\/]/, '');
-          data.nodeTemplate.label = data.nodeTemplate.label.replace(
-            /\.[^/.]+$/,
-            ''
-          );
-          data.nodeTemplate.image =
-            'data:image/svg+xml;utf8,' +
-            encodeURIComponent(notebookIcon.svgstr);
           data.nodeTemplate.app_data['artifact'] = item.path;
           data.nodeTemplate.app_data[
             'image'

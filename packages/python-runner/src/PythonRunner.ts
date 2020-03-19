@@ -136,8 +136,6 @@ export class PythonRunner {
 
       try {
         const tempKernel = this.kernel;
-        // eslint-disable-next-line
-        // @ts-ignore
         this.kernel = null;
         await tempKernel.shutdown();
         console.log(name + ' kernel shut down');

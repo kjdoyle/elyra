@@ -69,8 +69,6 @@ export class SubmitNotebookButtonExtension
   readonly app: JupyterFrontEnd;
 
   showWidget = (): void => {
-    // eslint-disable-next-line
-    // @ts-ignore
     const envVars: string[] = NotebookParser.getEnvVars(
       this.panel.content.model.toString()
     );
