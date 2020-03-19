@@ -84,8 +84,6 @@ export class PythonFileEditor extends DocumentWidget<
     this.addClass(PYTHON_FILE_EDITOR_CLASS);
     this.model = this.content.model;
     this.runner = new PythonRunner(this.model);
-    // eslint-disable-next-line
-    // @ts-ignore
     this.kernelName = null;
     this.emptyOutput = true;
 
