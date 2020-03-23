@@ -629,6 +629,8 @@ class PipelineEditorFactory extends ABCWidgetFactory<DocumentWidget> {
       node: document.createElement('div')
     });
     widget.addClass(PIPELINE_CLASS);
+    widget.title.iconClass = PIPELINE_ICON_CLASS;
+    widget.title.icon = pipelineIcon;
     return widget;
   }
 }
